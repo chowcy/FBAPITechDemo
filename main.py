@@ -8,12 +8,12 @@ FB_GROUP_ID = '1834901519863165'
 # https://developers.facebook.com/tools/explorer"
 #TODO fill in access token
 #Access token needs permission: publish actions (set to public)
-access_token = None
+access_token = 'EAACEdEose0cBAPtKkpwg06r5htisBTFahIlTOD6AABl1lbi9rah33pcARLa6roTONi4wMvWZACgMIyvk7uU0LPdqfoBYC2VDddSsm6O46QAfbCj8TZC2VQ9jVopBZCZAmx4BhM6Bth1yagSOZAGk4Ys38zA86MyImq0Ljf77rjWFYepdtaWgUstDUFvZAcVLYZD'
 if access_token == None:
     access_token = raw_input("\nCopy and paste token from https://developers.facebook.com/tools/explorer\n>  ")
 
 FB_BASEURL = "https://graph.facebook.com/v2.12/{}".format(FB_GROUP_ID)
-CACHE_FNAME = 'cache.json'
+# CACHE_FNAME = 'cache.json'
 
 #function that prints json nicely (for debugging only)
 def pretty(obj):
@@ -22,35 +22,14 @@ def pretty(obj):
 # Building the Facebook parameters dictionary
 url_params = {}
 url_params["access_token"] = access_token
-#post messages, likes, comments, subcomments, sublikes, submessages
+#post messages, from
 url_params["fields"] = "message,from"
-url_params['filter'] = 'stream'
-url_params["limit"] = 200
 
-#Get posts from the Facebook group
-try:
-    r = getWithCaching('{}/feed'.format(FB_BASEURL), params=url_params)
-    fb_posts = json.loads(r)['data']
-except:
-    print('Failed to get data from group')
-    sys.exit(0)
-
-
+#get feed information
+r = requests.get('{}/feed'.format(FB_BASEURL), params=url_params)
+print(pretty(json.loads(r.text)))
 #Test posting to a Facebook Group
-# r = requests.post('{}/feed'.format(FB_BASEURL), data={'message': 'Hello from Python File', 'access_token': access_token})
-# print(r.status_code)
-
-#Comment on posts that meet criteria
-#for every post in the feed
-for post in fb_posts:
-    #check for 'message' key in post, which contains the text of the post
-    if 'message' in post:
-        #criteria for things in the message
-        #dummy criteria below
-        if 'Python' in post['message']:
-            #get that post's ID
-            ID = post['id']
-            #post request to comment on that post
-            #below request does not work because of api deprecation
-            r = requests.post('{}/{}'.format(FB_BASEURL, ID), data={'message': 'commenting on all posts containing "Python"', 'access_token': access_token})
-            print(r.status_code)
+r = requests.post('{}/feed'.format(FB_BASEURL), data={'message': 'Hello from Python File', 'access_token': access_token})
+print(r.status_code)
+r = requests.get('{}/feed'.format(FB_BASEURL), params=url_params)
+print(pretty(json.loads(r.text)))
